@@ -33578,7 +33578,7 @@ MonoBehaviour:
   JumpTimeout: 0.3
   FallTimeout: 0.15
   Grounded: 1
-  GroundedOffset: 0.5
+  GroundedOffset: 0.1
   GroundedRadius: 0.28
   GroundLayers:
     serializedVersion: 2
@@ -33731,7 +33731,7 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 1.8
+  m_Height: 1.6
   m_Radius: 0.28
   m_SlopeLimit: 45
   m_StepOffset: 0.25
@@ -37086,7 +37086,7 @@ Transform:
   m_GameObject: {fileID: 791460653}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.70710677, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -32.693, y: 1.6973025, z: 5.830373}
+  m_LocalPosition: {x: -32.693, y: 1.6, z: 5.830373}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -65185,7 +65185,7 @@ Transform:
   m_GameObject: {fileID: 1378217079}
   serializedVersion: 2
   m_LocalRotation: {x: 0.0123396665, y: -0.97793764, z: 0.060524154, w: 0.19955596}
-  m_LocalPosition: {x: -32.693, y: 1.6973025, z: 5.830373}
+  m_LocalPosition: {x: -32.693, y: 1.6, z: 5.830373}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -83927,7 +83927,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4675232436007860, guid: 325c2a72f558d4e419ec4f9ea74e54f5, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.09730244
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4675232436007860, guid: 325c2a72f558d4e419ec4f9ea74e54f5, type: 3}
       propertyPath: m_LocalPosition.z
