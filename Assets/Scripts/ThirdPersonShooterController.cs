@@ -12,27 +12,99 @@ public class ThirdPersonShooterController : MonoBehaviour
     private float normalSensitivity = 1.0f;
     [SerializeField]
     private float aimSensitivity = 0.5f;
+    [SerializeField]
+    private LayerMask aimColliderLayerMask;
+    [SerializeField] 
+    private Transform vfxHit;
+    [SerializeField] 
+    private Transform vfxMiss;
+
+    [SerializeField]
+    private Transform debugTransform;
 
     private ThirdPersonController thirdPersonController;
     private StarterAssetsInputs starterAssetsInputs;
 
+    private Vector3 hitPosition;
+
     private void Awake()
     {
-        thirdPersonController= GetComponent<ThirdPersonController>();
-         starterAssetsInputs= GetComponent<StarterAssetsInputs>();
+        thirdPersonController = GetComponent<ThirdPersonController>();
+        starterAssetsInputs = GetComponent<StarterAssetsInputs>();
     }
 
 
     private void Update()
     {
-        if(starterAssetsInputs.aim)
+
+
+        // hit scan shooting
+        Vector3 mouseWorldPosition = Vector3.zero;
+        Vector2 screenCenterPoint = new Vector2(Screen.width / 2f, Screen.height / 2f);
+        Transform hitTransform = null;
+
+        Ray ray = Camera.main.ScreenPointToRay(screenCenterPoint);
+        if (Physics.Raycast(ray, out RaycastHit raycastHit, 999f, aimColliderLayerMask))
+        {
+            debugTransform.position = raycastHit.point;
+            mouseWorldPosition = raycastHit.point;
+            hitTransform = raycastHit.transform;
+            hitPosition = raycastHit.point;
+        }
+        else
+        {
+            mouseWorldPosition = ray.GetPoint(10);
+        }
+
+
+        if (starterAssetsInputs.aim)
         {
             aimVirtualCamera.gameObject.SetActive(true);
             thirdPersonController.Sensitivity = aimSensitivity;
-        } else
+            thirdPersonController.SetRotateOnMove(false);
+
+            Vector3 wordAimTarget = mouseWorldPosition;
+            wordAimTarget.y = transform.position.y;
+            Vector3 aimDirection = (wordAimTarget - transform.position).normalized;
+
+            transform.forward = Vector3.Lerp(transform.forward, aimDirection, Time.deltaTime * 20f);
+
+
+        }
+        else
         {
             aimVirtualCamera.gameObject.SetActive(false);
             thirdPersonController.Sensitivity = normalSensitivity;
+            thirdPersonController.SetRotateOnMove(true);
+        }
+
+
+        if (starterAssetsInputs.shoot)
+        {
+
+            if (hitTransform != null)
+            {
+                
+                Enemy enemy = hitTransform.GetComponent<Enemy>();
+                if (enemy != null)
+                {
+                    // hit target
+                    enemy.TakeDamage(2);
+                    Transform vfxBlood = Instantiate(vfxHit, hitPosition, Quaternion.identity);
+                    Destroy(vfxBlood.gameObject, 0.5f);
+                }
+                else
+                {
+                    // hit something else
+                    // rotate - calc angle between vertice and player(shot direction) or just towards the player
+                    Transform vfxBlood = Instantiate(vfxMiss, hitPosition, Quaternion.identity);
+                    Destroy(vfxBlood.gameObject, 0.5f);
+                }
+                
+
+            }
+
+            starterAssetsInputs.shoot = false;
         }
     }
 }
