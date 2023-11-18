@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
 using StarterAssets;
+using UnityEngine.Animations.Rigging;
 
 public class ThirdPersonShooterController : MonoBehaviour
 {
@@ -18,6 +19,14 @@ public class ThirdPersonShooterController : MonoBehaviour
     private Transform vfxHit;
     [SerializeField] 
     private Transform vfxMiss;
+    [SerializeField]
+    private Rig aimRig;
+    [SerializeField]
+    private ParticleSystem muzzleFlush;
+    [SerializeField]
+    private Transform casingSpawnPoint;
+    [SerializeField]
+    private GameObject bulletCasing;
 
     [SerializeField]
     private Transform debugTransform;
@@ -26,7 +35,7 @@ public class ThirdPersonShooterController : MonoBehaviour
     private StarterAssetsInputs starterAssetsInputs;
     private Animator animator;
 
-    private float aimRigWeight;
+    private float aimRigWeight = 0f;
     private Vector3 hitPosition;
 
     private void Awake()
@@ -39,12 +48,20 @@ public class ThirdPersonShooterController : MonoBehaviour
 
     private void Update()
     {
+        // refactor:
+        // HandleMouseWorldPosition()
+        // Handle Shooting()
+        // HandleAiming()
 
 
         // hit scan shooting
         Vector3 mouseWorldPosition = Vector3.zero;
         Vector2 screenCenterPoint = new Vector2(Screen.width / 2f, Screen.height / 2f);
         Transform hitTransform = null;
+
+        // Note: would "shoot" from the center of the camera, which can ignore obstacles between player and target
+        // Shooting from muzzle position offset destination depending on the distance - makes less acurate.
+        // In theory can make another ray to check for obstacles
 
         Ray ray = Camera.main.ScreenPointToRay(screenCenterPoint);
         if (Physics.Raycast(ray, out RaycastHit raycastHit, 999f, aimColliderLayerMask))
@@ -73,7 +90,6 @@ public class ThirdPersonShooterController : MonoBehaviour
             transform.forward = Vector3.Lerp(transform.forward, aimDirection, Time.deltaTime * 20f);
 
             aimRigWeight = 1f;
-            animator.SetLayerWeight(1, Mathf.Lerp(animator.GetLayerWeight(1), 1f, Time.deltaTime * 10f));
         }
         else
         {
@@ -82,8 +98,12 @@ public class ThirdPersonShooterController : MonoBehaviour
             thirdPersonController.SetRotateOnMove(true);
 
             aimRigWeight = 0f;
-            animator.SetLayerWeight(1, Mathf.Lerp(animator.GetLayerWeight(1), 0f, Time.deltaTime * 10f));
         }
+
+        // don't need if replace all animation to a rifle animations
+        aimRig.weight = Mathf.Lerp(aimRig.weight, aimRigWeight, Time.deltaTime * 20f);
+        
+        animator.SetLayerWeight(1, Mathf.Lerp(animator.GetLayerWeight(1), aimRigWeight, Time.deltaTime * 10f));
 
 
         if (starterAssetsInputs.shoot)
@@ -103,13 +123,18 @@ public class ThirdPersonShooterController : MonoBehaviour
                 else
                 {
                     // hit something else
-                    // rotate - calc angle between vertice and player(shot direction) or just towards the player
-                    Transform vfxBlood = Instantiate(vfxMiss, hitPosition, Quaternion.identity);
-                    Destroy(vfxBlood.gameObject, 0.5f);
+                    Transform vfxDust = Instantiate(vfxMiss, hitPosition, Quaternion.identity);
+                    vfxDust.forward = raycastHit.normal; // rotate to match hit object normal
+                    Destroy(vfxMiss.gameObject, 0.1f);
                 }
                 
 
             }
+            muzzleFlush.Play();
+
+            GameObject casing = Instantiate(bulletCasing, casingSpawnPoint.position, transform.rotation);
+            casing.GetComponent<BulletCasing>().AddForce(Vector3.up + transform.right);
+
 
             starterAssetsInputs.shoot = false;
         }
