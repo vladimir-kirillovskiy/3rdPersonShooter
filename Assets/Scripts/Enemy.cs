@@ -25,6 +25,13 @@ public class Enemy : MonoBehaviour
 
     private void Update()
     {
-        nma.SetDestination(playerTransform.position);
+        //nma.SetDestination(playerTransform.position);
+
+        // patrol by default?
+        // if player in sight - stop and shoot
+        // if gone out of sight - chase
+
+
+        
     }
 }
