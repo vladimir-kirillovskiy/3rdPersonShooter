@@ -20,7 +20,7 @@ public class ThirdPersonShooterController : MonoBehaviour
     [SerializeField] 
     private Transform vfxMiss;
     [SerializeField]
-    private Rig aimRig;
+    private MultiAimConstraint aimRig;
     [SerializeField]
     private ParticleSystem muzzleFlush;
     [SerializeField]
@@ -125,7 +125,7 @@ public class ThirdPersonShooterController : MonoBehaviour
                     // hit something else
                     Transform vfxDust = Instantiate(vfxMiss, hitPosition, Quaternion.identity);
                     vfxDust.forward = raycastHit.normal; // rotate to match hit object normal
-                    Destroy(vfxMiss.gameObject, 0.1f);
+                    Destroy(vfxDust.gameObject, 0.1f);
                 }
                 
 
