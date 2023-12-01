@@ -4,6 +4,7 @@ using UnityEngine;
 using Cinemachine;
 using StarterAssets;
 using UnityEngine.Animations.Rigging;
+using UnityEditor.PackageManager;
 
 public class ThirdPersonShooterController : MonoBehaviour
 {
@@ -27,9 +28,13 @@ public class ThirdPersonShooterController : MonoBehaviour
     private Transform casingSpawnPoint;
     [SerializeField]
     private GameObject bulletCasing;
+    [SerializeField]
+    private Transform muzzle;
 
     [SerializeField]
     private Transform debugTransform;
+    [SerializeField] 
+    TrailRenderer bulletTrail;
 
     private ThirdPersonController thirdPersonController;
     private StarterAssetsInputs starterAssetsInputs;
@@ -111,7 +116,8 @@ public class ThirdPersonShooterController : MonoBehaviour
 
             if (hitTransform != null)
             {
-                
+                TrailRenderer trail = Instantiate(bulletTrail, muzzle.position, Quaternion.identity);
+                StartCoroutine(SpawnTrail(trail, raycastHit.point));
                 Enemy enemy = hitTransform.GetComponent<Enemy>();
                 if (enemy != null)
                 {
@@ -138,5 +144,24 @@ public class ThirdPersonShooterController : MonoBehaviour
 
             starterAssetsInputs.shoot = false;
         }
+    }
+
+    private IEnumerator SpawnTrail(TrailRenderer trail, Vector3 point)
+    {
+        float time = 0;
+        Vector3 startPosition = trail.transform.position;
+
+        while (time < 1)
+        {
+            trail.transform.position = Vector3.Lerp(startPosition, point, time);
+            time += Time.deltaTime / trail.time;
+
+            yield return null;
+        }
+
+        // isShooting = false
+        trail.transform.position = point;
+        // instanciate hit particle
+        Destroy(trail.gameObject, trail.time);
     }
 }

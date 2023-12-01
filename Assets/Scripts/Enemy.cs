@@ -6,7 +6,8 @@ using UnityEngine.AI;
 public class Enemy : MonoBehaviour
 {
     private NavMeshAgent nma;
-    private Transform playerTransform;
+    [HideInInspector]
+    public Transform playerTransform;
 
     // if spotted chase or shoot
     public bool playerSpotted = false;
@@ -32,12 +33,17 @@ public class Enemy : MonoBehaviour
 
         // patrol by default?
 
-
+        // remove spotted from Enemy and use in EnemyFOV
+        // add playerToShoot bool?
         if (playerSpotted)
         {
-            if(playerInSight)
+
+            CheckPlayeriInSight();
+
+            if (playerInSight)
             {
                 // if player in sight - stop and shoot. Check with a raycast
+                transform.LookAt(playerTransform.position);
                 AttackPlayer();
             } 
             else
@@ -55,11 +61,13 @@ public class Enemy : MonoBehaviour
     {
         // ray in direction of player, if no obstacles - stop and shoot
         // if there are - chase
+        //if(Physics.Raycast(ray, out RaycastHit raycastHit, 999f, aimColliderLayerMask) { }
     }
 
     private void AttackPlayer()
     {
         // stop run animation
+        Debug.Log("Attack");
     }
 
     private void ChasePlayer()

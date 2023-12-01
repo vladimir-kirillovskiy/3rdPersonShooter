@@ -4,17 +4,24 @@ using UnityEngine;
 
 public class EnemyFOV : MonoBehaviour
 {
-    public float viewRadius = 10f;
+    [SerializeField]
+    private float viewRadius = 10f;
+    [SerializeField]
     [Range(0, 360)]
-    public float viewAngle = 100f;
+    private float viewAngle = 100f;
 
-    public LayerMask targetMask; // a player
-    public LayerMask obstacleMask; // everything but a player
+    [SerializeField]
+    private LayerMask targetMask; // a player
+    [SerializeField]
+    private LayerMask obstacleMask; // everything but a player
 
     // list of all targets to overlap a sphere
     private List<Transform> visibleTargets = new List<Transform>();
 
     private Enemy enemy;
+
+    private bool playerSpotted = false;
+    private bool playerInSight = false;
 
     private void Awake()
     {
@@ -39,7 +46,12 @@ public class EnemyFOV : MonoBehaviour
 
     private void FindVisibleTargets()
     {
-        if (enemy.playerSpotted) return;
+        // if spotted before redirect to inSight method
+        if (playerSpotted)
+        {
+            playerInSight = CheckInSight();
+            return;
+        }
 
         visibleTargets.Clear();
 
@@ -63,14 +75,41 @@ public class EnemyFOV : MonoBehaviour
                 {
                     visibleTargets.Add(target);
                     // double check if this is our player
-                    // as an option find a player by tag and get name to avoid hardcode
-                    if (targetsInViewRadius[i].name == "Character_MercenaryMale_01") 
+                    if (targetsInViewRadius[i].CompareTag("Player")) 
                     {
+                        playerSpotted = true;
                         enemy.playerSpotted = true;
                     }
                 }
             }
         }
+    }
+
+    private bool CheckInSight()
+    {
+        // Positions are WRONG!!!
+        Vector3 playerDirection = enemy.playerTransform.position - transform.position;
+        //playerDirection.y += 1;
+        
+        RaycastHit hit;
+
+        // Perform the raycast
+        Vector3 directionSource = transform.position;
+        directionSource.y += 1f;
+        Debug.DrawRay(directionSource, playerDirection, Color.red, 2f);
+        if (Physics.Raycast(directionSource, playerDirection.normalized, out hit, 999f))
+        {
+            Debug.Log(hit.collider.name);
+            // Check if the hit object is the player
+            if (hit.collider.CompareTag("Player"))
+            {
+                enemy.playerInSight = true;
+                return true; // Player is visible
+            }
+        }
+
+        enemy.playerInSight = false;
+        return false;
     }
 
     void OnDrawGizmos()
